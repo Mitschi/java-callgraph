@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -47,6 +48,17 @@ import org.apache.bcel.classfile.ClassParser;
 public class JCallGraph {
 
     public static void main(String[] args) {
+        Map<String, String> stringStringMap = new JCallGraph().generateCalls(args);
+        System.out.println(stringStringMap);
+        for (String s : stringStringMap.keySet()) {
+            System.out.println(s+": "+stringStringMap.get(s).length());
+        }
+    }
+
+
+    public  Map<String, String > generateCalls(String[] jars) {
+
+        Map<String, String> callsPerJar = new HashMap<>();
 
         Function<ClassParser, ClassVisitor> getClassVisitor =
                 (ClassParser cp) -> {
@@ -58,7 +70,7 @@ public class JCallGraph {
                 };
 
         try {
-            for (String arg : args) {
+            for (String arg : jars) {
 
                 File f = new File(arg);
 
@@ -75,25 +87,37 @@ public class JCallGraph {
                                     return (new ArrayList<String>()).stream();
 
                                 ClassParser cp = new ClassParser(arg, e.getName());
-                                return getClassVisitor.apply(cp).start().methodCalls().stream();
+                                ClassVisitor cv = getClassVisitor.apply(cp).start();
+                                List<String> localMethodCalls = cv.methodCalls();
+                                List<String> localInheritanceCalls = cv.inheritanceCalls();
+                                List<String> allCalls = new ArrayList<>();
+                                allCalls.addAll(localMethodCalls);
+                                allCalls.addAll(localInheritanceCalls);
+                                Stream<String> stream = allCalls.stream();
+//                                getClassVisitor.apply(cp).start().methodCalls().stream().collect(Collectors.toList());
+                                return stream;
                             }).
                             map(s -> s + "\n").
                             reduce(new StringBuilder(),
                                     StringBuilder::append,
                                     StringBuilder::append).toString();
 
-                    BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));
-                    log.write(methodCalls);
-                    log.close();
+//                    BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));
+//                    log.write(methodCalls);
+//                    log.close();
+
+                    callsPerJar.put(arg,methodCalls);
+
                 }
             }
         } catch (IOException e) {
             System.err.println("Error while processing jar: " + e.getMessage());
             e.printStackTrace();
         }
-    }
 
-    public static <T> Stream<T> enumerationAsStream(Enumeration<T> e) {
+        return callsPerJar;
+    }
+    public <T> Stream<T> enumerationAsStream(Enumeration<T> e) {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(
                         new Iterator<T>() {

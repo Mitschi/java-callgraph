@@ -37,7 +37,10 @@ import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.MethodGen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The simplest of class visitors, invokes the method visitor class for each
@@ -50,6 +53,7 @@ public class ClassVisitor extends EmptyVisitor {
     private String classReferenceFormat;
     private final DynamicCallManager DCManager = new DynamicCallManager();
     private List<String> methodCalls = new ArrayList<>();
+    private List<String> inheritanceCalls = new ArrayList<>();
 
     public ClassVisitor(JavaClass jc) {
         clazz = jc;
@@ -59,6 +63,30 @@ public class ClassVisitor extends EmptyVisitor {
 
     public void visitJavaClass(JavaClass jc) {
         jc.getConstantPool().accept(this);
+        try {
+            if(jc.getInterfaceNames()!= null && jc.getInterfaceNames().length>0) {
+                String interfaceString = Arrays.stream(jc.getInterfaceNames()).parallel().collect(Collectors.joining(","));
+
+                String[] interfaces = interfaceString.split(",");
+                for (String anInterface : interfaces) {
+                    inheritanceCalls.add(clazz.getClassName()+" (INHINT)"+anInterface);
+                }
+
+
+
+//                classReferenceFormat = "C:" + clazz.getClassName() + ":I:" + clazz.isInterface() + ":" + ParseHelper.getInterfacesAsString(clazz.getInterfaceNames()) + " %s";
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            String superclassName = jc.getSuperclassName();
+            if(superclassName!=null && !"".equals(superclassName)) {
+                inheritanceCalls.add(clazz.getClassName() + " (INHSUP)" + superclassName);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         Method[] methods = jc.getMethods();
         for (int i = 0; i < methods.length; i++) {
             Method method = methods[i];
@@ -77,7 +105,7 @@ public class ClassVisitor extends EmptyVisitor {
             if (constant.getTag() == 7) {
                 String referencedClass = 
                     constantPool.constantToString(constant);
-                System.out.println(String.format(classReferenceFormat, referencedClass));
+//                System.out.println(String.format(classReferenceFormat, referencedClass));
             }
         }
     }
@@ -91,6 +119,10 @@ public class ClassVisitor extends EmptyVisitor {
     public ClassVisitor start() {
         visitJavaClass(clazz);
         return this;
+    }
+
+    public List<String> inheritanceCalls() {
+        return this.inheritanceCalls;
     }
 
     public List<String> methodCalls() {

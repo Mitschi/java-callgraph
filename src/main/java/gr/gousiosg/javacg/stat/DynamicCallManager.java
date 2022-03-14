@@ -79,12 +79,16 @@ public class DynamicCallManager {
         String code = method.getCode().toString();
         Matcher matcher = BOOTSTRAP_CALL_PATTERN.matcher(code);
         while (matcher.find()) {
-            int bootIndex = Integer.parseInt(matcher.group(1));
-            BootstrapMethod bootMethod = boots[bootIndex];
-            int calledIndex = bootMethod.getBootstrapArguments()[CALL_HANDLE_INDEX_ARGUMENT];
-            String calledName = getMethodNameFromHandleIndex(cp, calledIndex);
-            String callerName = method.getName();
-            dynamicCallers.put(calledName, callerName);
+            try {
+                int bootIndex = Integer.parseInt(matcher.group(1));
+                BootstrapMethod bootMethod = boots[bootIndex];
+                int calledIndex = bootMethod.getBootstrapArguments()[CALL_HANDLE_INDEX_ARGUMENT];
+                String calledName = getMethodNameFromHandleIndex(cp, calledIndex);
+                String callerName = method.getName();
+                dynamicCallers.put(calledName, callerName);
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                System.err.println("REGEX PROB: skipping: "+method.getSignature());
+            }
         }
     }
 

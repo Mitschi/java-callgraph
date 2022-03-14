@@ -63,9 +63,9 @@ public class MethodStack {
                     return v1.compareTo(v2);
                 });
 
-                for (Pair<String, String> key : keys) {
-                    System.out.println(key + " " + callgraph.get(key));
-                }
+//                for (Pair<String, String> key : keys) {
+//                    System.out.println(key + " " + callgraph.get(key));
+//                }
             }
         });
         File log = new File("calltrace.txt");
