@@ -18,7 +18,7 @@
       <groupId>org.apache.bcel</groupId>
       <artifactId>bcel</artifactId>
       <version>6.2</version>
-      <scope>provided</scope>
+<!--      <scope>provided</scope>-->
     </dependency>
     <dependency>
       <groupId>javassist</groupId>

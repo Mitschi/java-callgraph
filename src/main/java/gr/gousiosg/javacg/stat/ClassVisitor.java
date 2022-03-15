@@ -36,11 +36,10 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.MethodGen;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The simplest of class visitors, invokes the method visitor class for each
@@ -52,8 +51,10 @@ public class ClassVisitor extends EmptyVisitor {
     private ConstantPoolGen constants;
     private String classReferenceFormat;
     private final DynamicCallManager DCManager = new DynamicCallManager();
-    private List<String> methodCalls = new ArrayList<>();
-    private List<String> inheritanceCalls = new ArrayList<>();
+    private List<GousiousCall> methodCalls = new ArrayList<>();
+    private List<GousiousCall> inheritanceCalls = new ArrayList<>();
+
+    private Map<String,JavaClass> classes = new HashMap<>();
 
     public ClassVisitor(JavaClass jc) {
         clazz = jc;
@@ -63,13 +64,15 @@ public class ClassVisitor extends EmptyVisitor {
 
     public void visitJavaClass(JavaClass jc) {
         jc.getConstantPool().accept(this);
+        classes.put(jc.getClassName(),jc);
         try {
             if(jc.getInterfaceNames()!= null && jc.getInterfaceNames().length>0) {
                 String interfaceString = Arrays.stream(jc.getInterfaceNames()).parallel().collect(Collectors.joining(","));
 
                 String[] interfaces = interfaceString.split(",");
                 for (String anInterface : interfaces) {
-                    inheritanceCalls.add(anInterface+" (INHINT)"+clazz.getClassName());
+//                    inheritanceCalls.add(anInterface+" (INHINT)"+clazz.getClassName());
+                    inheritanceCalls.add(new GousiousCall(anInterface,"(INHINT)",clazz.getClassName()));
                 }
 
 
@@ -82,7 +85,8 @@ public class ClassVisitor extends EmptyVisitor {
         try {
             String superclassName = jc.getSuperclassName();
             if(superclassName!=null && !"".equals(superclassName)) {
-                inheritanceCalls.add(superclassName + " (INHSUP)" + clazz.getClassName());
+//                inheritanceCalls.add(superclassName + " (INHSUP)" + clazz.getClassName());
+                inheritanceCalls.add(new GousiousCall(superclassName,"(INHSUP)",clazz.getClassName()));
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -113,7 +117,23 @@ public class ClassVisitor extends EmptyVisitor {
     public void visitMethod(Method method) {
         MethodGen mg = new MethodGen(method, clazz.getClassName(), constants);
         MethodVisitor visitor = new MethodVisitor(mg, clazz);
-        methodCalls.addAll(visitor.start());
+        List<String> start = visitor.start();
+        for (String mCall : start) {
+            String patternString1 = "M:(.*) \\((M|I|O|S|D|INHSUP|INHINT)\\)(.*)";
+
+            Pattern pattern = Pattern.compile(patternString1);
+            Matcher matcher = pattern.matcher(mCall);
+            boolean found = matcher.find();
+            if(found) {
+                GousiousCall gc = new GousiousCall(matcher.group(1).trim(),"("+matcher.group(2).trim()+")",matcher.group(3).trim());
+                methodCalls.add(gc);
+                if(!("M:"+gc).equals(mCall)) {
+                    System.out.println("UNEQUAL");
+                }
+            } else {
+                System.out.println("ERROR!!!");
+            }
+        }
     }
 
     public ClassVisitor start() {
@@ -121,11 +141,15 @@ public class ClassVisitor extends EmptyVisitor {
         return this;
     }
 
-    public List<String> inheritanceCalls() {
+    public List<GousiousCall> inheritanceCalls() {
         return this.inheritanceCalls;
     }
 
-    public List<String> methodCalls() {
+    public List<GousiousCall> methodCalls() {
         return this.methodCalls;
+    }
+
+    public Map<String, JavaClass> classes() {
+        return classes;
     }
 }
