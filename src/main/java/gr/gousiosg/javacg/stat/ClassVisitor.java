@@ -69,7 +69,7 @@ public class ClassVisitor extends EmptyVisitor {
 
                 String[] interfaces = interfaceString.split(",");
                 for (String anInterface : interfaces) {
-                    inheritanceCalls.add(clazz.getClassName()+" (INHINT)"+anInterface);
+                    inheritanceCalls.add(anInterface+" (INHINT)"+clazz.getClassName());
                 }
 
 
@@ -82,7 +82,7 @@ public class ClassVisitor extends EmptyVisitor {
         try {
             String superclassName = jc.getSuperclassName();
             if(superclassName!=null && !"".equals(superclassName)) {
-                inheritanceCalls.add(clazz.getClassName() + " (INHSUP)" + superclassName);
+                inheritanceCalls.add(superclassName + " (INHSUP)" + clazz.getClassName());
             }
         } catch(Exception e) {
             e.printStackTrace();
