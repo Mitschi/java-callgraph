@@ -7,6 +7,9 @@ public class GousiousCall {
     private String middleSide;
     private String rightSide;
 
+    private Boolean leftSideFQN=false;
+    private Boolean rightSideFQN=false;
+
     public GousiousCall(String leftSide, String middleSide, String rightSide) {
         this.leftSide = leftSide;
         this.middleSide = middleSide;
@@ -35,6 +38,22 @@ public class GousiousCall {
 
     public void setRightSide(String rightSide) {
         this.rightSide = rightSide;
+    }
+
+    public Boolean getLeftSideFQN() {
+        return leftSideFQN;
+    }
+
+    public void setLeftSideFQN(Boolean leftSideFQN) {
+        this.leftSideFQN = leftSideFQN;
+    }
+
+    public Boolean getRightSideFQN() {
+        return rightSideFQN;
+    }
+
+    public void setRightSideFQN(Boolean rightSideFQN) {
+        this.rightSideFQN = rightSideFQN;
     }
 
     @Override

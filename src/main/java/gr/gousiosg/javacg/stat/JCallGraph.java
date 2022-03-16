@@ -137,15 +137,17 @@ public class JCallGraph {
                     callsPerJar.put(arg,methodCalls);
 
                     //evtl. Postprocessing for FQN
-//                    for (GousiousCall gc : methodCalls) {
-//                        if(currentClasses.containsKey(gc.getLeftSide())) {
-//                            gc.setLeftSide(f.getAbsolutePath()+"::"+gc.getLeftSide());
-//                        }
-//                        if(currentClasses.containsKey(gc.getRightSide())) {
-//                            gc.setRightSide(f.getAbsolutePath()+"::"+gc.getRightSide());
-//                        }
-////                        System.out.println();
-//                    }
+                    for (GousiousCall gc : methodCalls) {
+                        if(currentClasses.containsKey(extractClassPart(gc.getLeftSide()))) {
+                            gc.setLeftSide(f.getAbsolutePath()+"::"+gc.getLeftSide());
+                            gc.setLeftSideFQN(true);
+                        }
+                        if(currentClasses.containsKey(extractClassPart(gc.getRightSide()))) {
+                            gc.setRightSide(f.getAbsolutePath()+"::"+gc.getRightSide());
+                            gc.setRightSideFQN(true);
+                        }
+//                        System.out.println();
+                    }
                 }
 
 
@@ -158,6 +160,11 @@ public class JCallGraph {
         this.calls= callsPerJar;
         this.classes = classesPerJar;
     }
+
+    private String extractClassPart(String fullPath) {
+        return fullPath.split(":")[0];
+    }
+
     public <T> Stream<T> enumerationAsStream(Enumeration<T> e) {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(
