@@ -9,11 +9,20 @@ public class GousiousCall {
 
     private Boolean leftSideFQN=false;
     private Boolean rightSideFQN=false;
+    private Boolean isOptional=false;
 
     public GousiousCall(String leftSide, String middleSide, String rightSide) {
         this.leftSide = leftSide;
         this.middleSide = middleSide;
         this.rightSide = rightSide;
+    }
+
+    public Boolean getOptional() {
+        return isOptional;
+    }
+
+    public void setOptional(Boolean optional) {
+        isOptional = optional;
     }
 
     public String getLeftSide() {
