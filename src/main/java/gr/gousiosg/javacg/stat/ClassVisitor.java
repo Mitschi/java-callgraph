@@ -72,7 +72,7 @@ public class ClassVisitor extends EmptyVisitor {
                 String[] interfaces = interfaceString.split(",");
                 for (String anInterface : interfaces) {
 //                    inheritanceCalls.add(anInterface+" (INHINT)"+clazz.getClassName());
-                    inheritanceCalls.add(new GousiousCall(anInterface,"(INHINT)",clazz.getClassName()));
+                    inheritanceCalls.add(new GousiousCall(anInterface,"(INHINT)",clazz.getClassName(),null,null));
                 }
 
 
@@ -86,7 +86,7 @@ public class ClassVisitor extends EmptyVisitor {
             String superclassName = jc.getSuperclassName();
             if(superclassName!=null && !"".equals(superclassName)) {
 //                inheritanceCalls.add(superclassName + " (INHSUP)" + clazz.getClassName());
-                inheritanceCalls.add(new GousiousCall(superclassName,"(INHSUP)",clazz.getClassName()));
+                inheritanceCalls.add(new GousiousCall(superclassName,"(INHSUP)",clazz.getClassName(),null,null));
             }
         } catch(Exception e) {
             e.printStackTrace();
@@ -119,13 +119,13 @@ public class ClassVisitor extends EmptyVisitor {
         MethodVisitor visitor = new MethodVisitor(mg, clazz);
         List<String> start = visitor.start();
         for (String mCall : start) {
-            String patternString1 = "M:(.*) \\((M|I|O|S|D|INHSUP|INHINT)\\)(.*)";
+            String patternString1 = "M:(.*):(.*) \\((M|I|O|S|D|INHSUP|INHINT)\\)(.*):(.*)";
 
             Pattern pattern = Pattern.compile(patternString1);
             Matcher matcher = pattern.matcher(mCall);
             boolean found = matcher.find();
             if(found) {
-                GousiousCall gc = new GousiousCall(matcher.group(1).trim(),"("+matcher.group(2).trim()+")",matcher.group(3).trim());
+                GousiousCall gc = new GousiousCall(matcher.group(1).trim(),"("+matcher.group(3).trim()+")",matcher.group(4).trim(),matcher.group(2),matcher.group(5));
                 methodCalls.add(gc);
                 if(!("M:"+gc).equals(mCall)) {
                     System.out.println("UNEQUAL");
