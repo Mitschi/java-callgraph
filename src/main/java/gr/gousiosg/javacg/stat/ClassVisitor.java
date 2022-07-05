@@ -125,14 +125,24 @@ public class ClassVisitor extends EmptyVisitor {
             Matcher matcher = pattern.matcher(mCall);
             boolean found = matcher.find();
             if(found) {
-                GousiousCall gc = new GousiousCall(matcher.group(1).trim(),"("+matcher.group(3).trim()+")",matcher.group(4).trim(),matcher.group(2),matcher.group(5));
+                GousiousCall gc = new GousiousCall(getFQNForSide(matcher.group(1).trim()),"("+matcher.group(3).trim()+")",getFQNForSide(matcher.group(4).trim()),matcher.group(2),matcher.group(5));
                 methodCalls.add(gc);
-                if(!("M:"+gc).equals(mCall)) {
-                    System.out.println("UNEQUAL");
-                }
             } else {
                 System.out.println("ERROR!!!");
             }
+        }
+    }
+
+
+    private String getFQNForSide(String callSide) {
+        String[] callParts = callSide.split("\\(");
+        try {
+            String paramString = callParts[1].split("\\)")[0];
+            String[] params = paramString.split(",");
+            int paramCount = params.length;
+            return callParts[0]+"("+paramCount+")";
+        } catch (IndexOutOfBoundsException e){
+            return callSide;
         }
     }
 
