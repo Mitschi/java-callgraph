@@ -70,14 +70,12 @@ public class ClassVisitor extends EmptyVisitor {
                 String interfaceString = Arrays.stream(jc.getInterfaceNames()).parallel().collect(Collectors.joining(","));
 
                 String[] interfaces = interfaceString.split(",");
+                String middleSide = jc.isInterface() ? "(INHSUP)" : "(INHINT)"; // if jc is interface it all used interfaces are effectively extended superclasses
                 for (String anInterface : interfaces) {
-//                    inheritanceCalls.add(anInterface+" (INHINT)"+clazz.getClassName());
-                    inheritanceCalls.add(new GousiousCall(anInterface,"(INHINT)",clazz.getClassName(),null,null));
+                    inheritanceCalls.add(new GousiousCall(anInterface,middleSide,clazz.getClassName(),null,null));
                 }
 
 
-
-//                classReferenceFormat = "C:" + clazz.getClassName() + ":I:" + clazz.isInterface() + ":" + ParseHelper.getInterfacesAsString(clazz.getInterfaceNames()) + " %s";
             }
         } catch(Exception e) {
             e.printStackTrace();
