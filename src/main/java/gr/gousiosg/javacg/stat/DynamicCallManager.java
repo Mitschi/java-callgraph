@@ -91,6 +91,8 @@ public class DynamicCallManager {
             } catch (ArrayIndexOutOfBoundsException aioobe) {
                 //System.err.println("REGEX PROB: skipping: "+method.getSignature());
                 //only miss bootstrap methods
+            } catch(ClassCastException e) {
+                System.err.println("class cast exception"+e.getMessage());
             }
         }
     }
